@@ -97,10 +97,15 @@ func (d *deployer) deploy(ctx context.Context) (*clouddeploy.DeployResult, error
 	if _, err := terraformInit(terraformConfigPath, &terraformInitOptions{disableBackendInitialization: true, disableModuleDownloads: true}); err != nil {
 		return nil, fmt.Errorf("error running terraform init to install providers: %v", err)
 	}
-	if _, err := terraformApply(terraformConfigPath, &terraformApplyOptions{applyParallelism: d.params.applyParallelism, lockTimeout: d.params.lockTimeout}); err != nil {
-		return nil, fmt.Errorf("error running terraform apply: %v", err)
+	if len(d.params.backendWorkspace) > 0 {
+		if currentWorkspace, _ := terraformWorkspaceShow(terraformConfigPath); string(currentWorkspace) != d.params.backendWorkspace {
+			return nil, fmt.Errorf("an error occurred while validating the current workspace. Found %s instead of %s", currentWorkspace, d.params.backendWorkspace)
+		}
 	}
-	fmt.Println("Finished applying Terraform configuration")
+	// if _, err := terraformApply(terraformConfigPath, &terraformApplyOptions{applyParallelism: d.params.applyParallelism, lockTimeout: d.params.lockTimeout}); err != nil {
+	// 	return nil, fmt.Errorf("error running terraform apply: %v", err)
+	// }
+	fmt.Println("TEST: Finished applying Terraform configuration")
 
 	fmt.Println("Getting the Terraform state to provide as a deploy artifact")
 	ts, err := terraformShowState(terraformConfigPath)

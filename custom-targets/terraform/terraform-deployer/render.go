@@ -138,6 +138,15 @@ func (r *renderer) render(ctx context.Context) (*clouddeploy.RenderResult, error
 	if _, err := terraformInit(terraformConfigPath, &terraformInitOptions{}); err != nil {
 		return nil, fmt.Errorf("error initializing terraform: %v", err)
 	}
+	if len(r.params.backendWorkspace) > 0 {
+		if _, err := terraformWorkspaceNew(terraformConfigPath, r.params.backendWorkspace); err != nil {
+			fmt.Printf("error creating terraform workspace: %v", err)
+			if _, err := terraformWorkspaceSelect(terraformConfigPath, r.params.backendWorkspace); err != nil {
+				return nil, fmt.Errorf("error selecting terraform workspace: %v", err)
+			}
+		}
+	}
+
 	if _, err := terraformValidate(terraformConfigPath); err != nil {
 		return nil, fmt.Errorf("error validating terraform: %v", err)
 	}

@@ -26,6 +26,7 @@ import (
 const (
 	backendBucketEnvKey    = "CLOUD_DEPLOY_customTarget_tfBackendBucket"
 	backendPrefixEnvKey    = "CLOUD_DEPLOY_customTarget_tfBackendPrefix"
+	backendWorkspaceEnvKey = "CLOUD_DEPLOY_customTarget_tfBackendWorkspace"
 	configPathEnvKey       = "CLOUD_DEPLOY_customTarget_tfConfigurationPath"
 	variablePathEnvKey     = "CLOUD_DEPLOY_customTarget_tfVariablePath"
 	enableRenderPlanEnvKey = "CLOUD_DEPLOY_customTarget_tfEnableRenderPlan"
@@ -39,6 +40,8 @@ type params struct {
 	backendBucket string
 	// Prefix to use for the Cloud Storage objects that represent the Terraform state.
 	backendPrefix string
+	// Workspace is a named Terraform state file to separate deployments of the same code.
+	backendWorkspace string
 	// Path to the Terraform configuration in the Cloud Deploy Release archive. If not
 	// provided then defaults to the root directory of the archive.
 	configPath string
@@ -64,6 +67,12 @@ func determineParams() (*params, error) {
 	if len(backendPrefix) == 0 {
 		return nil, fmt.Errorf("parameter %q is required", backendPrefixEnvKey)
 	}
+	backendWorkspace, ok := os.LookupEnv(backendWorkspaceEnvKey)
+	if !ok {
+		fmt.Printf("%s not set\n", backendWorkspaceEnvKey)
+	} else {
+		fmt.Printf("%s is set to %s\n", backendWorkspaceEnvKey, backendWorkspace)
+	}
 
 	enablePlan := false
 	ep, ok := os.LookupEnv(enableRenderPlanEnvKey)
@@ -88,6 +97,7 @@ func determineParams() (*params, error) {
 	return &params{
 		backendBucket:    backendBucket,
 		backendPrefix:    backendPrefix,
+		backendWorkspace: backendWorkspace,
 		configPath:       os.Getenv(configPathEnvKey),
 		variablePath:     os.Getenv(variablePathEnvKey),
 		enableRenderPlan: enablePlan,

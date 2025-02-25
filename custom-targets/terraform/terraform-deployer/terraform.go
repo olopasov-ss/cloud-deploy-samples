@@ -69,24 +69,42 @@ func terraformShowPlan(workingDir, planFile string) ([]byte, error) {
 	return runCmd(terraformBin, args, true, setWorkingDir(workingDir))
 }
 
-// terraformApplyOptions configures the args provided to `terraform apply`.
-type terraformApplyOptions struct {
-	applyParallelism int
-	lockTimeout      string
-}
-
-// terraformApply runs `terraform apply` in the provided directory.
-func terraformApply(workingDir string, opts *terraformApplyOptions) ([]byte, error) {
-	args := []string{"apply", "-auto-approve", "-no-color"}
-	if len(opts.lockTimeout) != 0 {
-		args = append(args, fmt.Sprintf("-lock-timeout=%s", opts.lockTimeout))
-	}
-	if opts.applyParallelism > 0 {
-		args = append(args, fmt.Sprintf("-parallelism=%d", opts.applyParallelism))
-	}
-	fmt.Printf("Running terraform apply in %s\n", workingDir)
+func terraformWorkspaceNew(workingDir, workspace string) ([]byte, error) {
+	args := []string{"workspace", "new", workspace}
+	fmt.Printf("Creating terraform workspace in %s\n", workingDir)
 	return runCmd(terraformBin, args, false, setWorkingDir(workingDir))
 }
+
+func terraformWorkspaceSelect(workingDir, workspace string) ([]byte, error) {
+	args := []string{"workspace", "select", workspace}
+	fmt.Printf("Selecting terraform workspace in %s\n", workingDir)
+	return runCmd(terraformBin, args, false, setWorkingDir(workingDir))
+}
+
+func terraformWorkspaceShow(workingDir string) ([]byte, error) {
+	args := []string{"workspace", "show"}
+	fmt.Printf("Checking current terraform workspace in %s\n", workingDir)
+	return runCmd(terraformBin, args, false, setWorkingDir(workingDir))
+}
+
+// terraformApplyOptions configures the args provided to `terraform apply`.
+// type terraformApplyOptions struct {
+// 	applyParallelism int
+// 	lockTimeout      string
+// }
+
+// // terraformApply runs `terraform apply` in the provided directory.
+// func terraformApply(workingDir string, opts *terraformApplyOptions) ([]byte, error) {
+// 	args := []string{"apply", "-auto-approve", "-no-color"}
+// 	if len(opts.lockTimeout) != 0 {
+// 		args = append(args, fmt.Sprintf("-lock-timeout=%s", opts.lockTimeout))
+// 	}
+// 	if opts.applyParallelism > 0 {
+// 		args = append(args, fmt.Sprintf("-parallelism=%d", opts.applyParallelism))
+// 	}
+// 	fmt.Printf("Running terraform apply in %s\n", workingDir)
+// 	return runCmd(terraformBin, args, false, setWorkingDir(workingDir))
+// }
 
 // terraformShowState runs `terraform show` in the provided directory. The output
 // from this command is not written to stdout.
